@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: signage_db
+    environment:
+      POSTGRES_USER: signage_user
+      POSTGRES_PASSWORD: signage_password
+      POSTGRES_DB: signage_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - signage_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U signage_user -d signage_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: signage_backend
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: signage_user
+      DB_PASSWORD: signage_password
+      DB_NAME: signage_db
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - signage_network
+    command: npm run dev
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: signage_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - signage_network
+    environment:
+      VITE_API_URL: http://localhost:5000
+    command: npm run dev
+
+volumes:
+  postgres_data:
+
+networks:
+  signage_network:
+    driver: bridge
