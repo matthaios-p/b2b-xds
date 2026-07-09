@@ -59,6 +59,47 @@ function Home() {
     setError(null)
   }
 
+  // Auth and Cart hooks
+  const { user, isAuthenticated } = useAuth()
+  const { addItem } = useCart()
+  const navigate = (path) => window.location.assign(path)
+
+  const [adding, setAdding] = useState(false)
+  const [addMessage, setAddMessage] = useState(null)
+
+  async function handleAddToCart() {
+    if (!result) return
+    if (!isAuthenticated) {
+      // redirect to login
+      navigate('/login')
+      return
+    }
+
+    setAdding(true)
+    setAddMessage(null)
+    try {
+      const aiSpecs = {
+        raw_prompt: prompt,
+        parsed: result.specifications,
+        pricing_per_unit: result.pricing_per_unit,
+        pricing_total: result.pricing_total
+      }
+      const unitPrice = Number(result.pricing_per_unit.total_usd) || 0
+      const res = await addItem(null, 1, aiSpecs, unitPrice)
+      if (res.success) {
+        setAddMessage('Added to cart')
+      } else {
+        setAddMessage(res.error || 'Failed to add to cart')
+      }
+    } catch (err) {
+      console.error('Add to cart error', err)
+      setAddMessage('Failed to add to cart')
+    } finally {
+      setAdding(false)
+      setTimeout(() => setAddMessage(null), 3000)
+    }
+  }
+
   return (
     <div className="app-container">
       <header className="header">
@@ -227,6 +268,33 @@ function Home() {
               <div className="results-footer">
                 <p>💡 This quote is generated based on AI interpretation of your description. Contact us for detailed review before finalizing.</p>
               </div>
+
+              {/* Add to Cart */}
+              {result && (
+                <div style={{ marginTop: 12 }}>
+                  {isAuthenticated ? (
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleAddToCart}
+                      disabled={adding}
+                    >
+                      {adding ? 'Adding...' : 'Add to Cart'}
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => navigate('/login')}
+                    >
+                      Log in to Order
+                    </button>
+                  )}
+
+                  {addMessage && (
+                    <span style={{ marginLeft: 12 }}>{addMessage}</span>
+                  )}
+                </div>
+              )}
+
             </div>
           )}
         </div>

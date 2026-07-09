@@ -33,9 +33,16 @@ export function CartProvider({ children }) {
     }
   }
 
-  async function addItem(productId, quantity = 1, ai_custom_specs = null) {
+  async function addItem(productId, quantity = 1, ai_custom_specs = null, unit_price = null) {
     try {
-      const payload = { productId, quantity, ai_custom_specs }
+      // map to backend expected keys
+      const payload = {
+        product_id: productId || null,
+        ai_custom_specs_json: ai_custom_specs || null,
+        quantity,
+      }
+      if (unit_price != null) payload.unit_price = unit_price
+
       const res = await axios.post(`${API_BASE_URL}/api/cart`, payload)
       const added = res.data?.item
       if (added) {
