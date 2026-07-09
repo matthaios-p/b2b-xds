@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import axios from 'axios'
 import './App.css'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import Login from './components/Auth/Login'
+import Register from './components/Auth/Register'
 
-export default function App() {
+function Home() {
   const [prompt, setPrompt] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
@@ -12,7 +15,7 @@ export default function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!prompt.trim()) {
       setError('Please enter your requirements')
       return
@@ -227,5 +230,22 @@ export default function App() {
         <p>© 2024 B2B Signage Cost Calculator. Powered by React + OpenAI</p>
       </footer>
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <nav style={{ padding: 12, background: 'rgba(255,255,255,0.9)' }}>
+        <Link to="/" style={{ marginRight: 12 }}>Home</Link>
+        <Link to="/login" style={{ marginRight: 12 }}>Login</Link>
+        <Link to="/register">Register</Link>
+      </nav>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </BrowserRouter>
   )
 }

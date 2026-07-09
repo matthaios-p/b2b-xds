@@ -1,10 +1,13 @@
-FROM node:18-alpine
+FROM node:18
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci
+RUN rm -f package-lock.json && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm install --omit=optional && \
+    npm install @rollup/rollup-linux-x64-gnu
 
 COPY . .
 
