@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/authRoutes');
+const cartRoutes = require('./routes/cartRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,6 +25,9 @@ app.get('/health', (req, res) => {
 app.use('/api', apiRoutes);
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Cart routes (protected)
+app.use('/api/cart', cartRoutes);
 
 // 404 handler
 app.use((req, res) => {
