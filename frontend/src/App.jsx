@@ -5,7 +5,11 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Login from './components/Auth/Login'
 import Register from './components/Auth/Register'
 import { AuthProvider } from './context/AuthContext'
+import { CartProvider } from './context/CartContext'
 import Navbar from './components/Layout/Navbar'
+import ProtectedRoute from './components/Auth/ProtectedRoute'
+import Cart from './pages/Cart'
+import Checkout from './pages/Checkout'
 
 function Home() {
   const [prompt, setPrompt] = useState('')
@@ -238,14 +242,20 @@ function Home() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </Routes>
-      </BrowserRouter>
+      <CartProvider>
+        <BrowserRouter>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            {/* Protected routes */}
+            <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+            <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+          </Routes>
+        </BrowserRouter>
+      </CartProvider>
     </AuthProvider>
   )
 }
