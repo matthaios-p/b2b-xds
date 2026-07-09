@@ -4,6 +4,8 @@ import './App.css'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Login from './components/Auth/Login'
 import Register from './components/Auth/Register'
+import { AuthProvider } from './context/AuthContext'
+import Navbar from './components/Layout/Navbar'
 
 function Home() {
   const [prompt, setPrompt] = useState('')
@@ -235,17 +237,15 @@ function Home() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <nav style={{ padding: 12, background: 'rgba(255,255,255,0.9)' }}>
-        <Link to="/" style={{ marginRight: 12 }}>Home</Link>
-        <Link to="/login" style={{ marginRight: 12 }}>Login</Link>
-        <Link to="/register">Register</Link>
-      </nav>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }

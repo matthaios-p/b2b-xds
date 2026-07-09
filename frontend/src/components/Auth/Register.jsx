@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 
 export default function Register() {
   const [name, setName] = useState('')
@@ -9,24 +9,21 @@ export default function Register() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
-
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+  const { register } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/auth/register`, { name, email, password })
-      if (res.data && res.data.token) {
-        localStorage.setItem('token', res.data.token)
-        localStorage.setItem('user', JSON.stringify(res.data.user))
+      const res = await register(name, email, password)
+      if (res.success) {
         navigate('/')
       } else {
-        setError('Invalid response from server')
+        setError(res.error || 'Registration failed')
       }
     } catch (err) {
-      setError(err.response?.data?.error || err.message)
+      setError(err.message || 'Registration error')
     } finally {
       setLoading(false)
     }
