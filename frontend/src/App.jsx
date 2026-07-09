@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import axios from 'axios'
 import './App.css'
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom'
 import Login from './components/Auth/Login'
 import Register from './components/Auth/Register'
-import { AuthProvider } from './context/AuthContext'
-import { CartProvider } from './context/CartContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import { CartProvider, useCart } from './context/CartContext'
 import Navbar from './components/Layout/Navbar'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import Cart from './pages/Cart'
@@ -62,10 +62,10 @@ function Home() {
   // Auth and Cart hooks
   const { user, isAuthenticated } = useAuth()
   const { addItem } = useCart()
-  const navigate = (path) => window.location.assign(path)
+  const navigate = useNavigate()
 
   const [adding, setAdding] = useState(false)
-  const [addMessage, setAddMessage] = useState(null)
+  const [toast, setToast] = useState(null)
 
   async function handleAddToCart() {
     if (!result) return
@@ -76,7 +76,7 @@ function Home() {
     }
 
     setAdding(true)
-    setAddMessage(null)
+    setToast(null)
     try {
       const aiSpecs = {
         raw_prompt: prompt,
@@ -87,16 +87,21 @@ function Home() {
       const unitPrice = Number(result.pricing_per_unit.total_usd) || 0
       const res = await addItem(null, 1, aiSpecs, unitPrice)
       if (res.success) {
-        setAddMessage('Added to cart')
+        setToast('Added to cart')
+        setTimeout(() => {
+          setToast(null)
+          navigate('/cart')
+        }, 1200)
       } else {
-        setAddMessage(res.error || 'Failed to add to cart')
+        setToast(res.error || 'Failed to add to cart')
+        setTimeout(() => setToast(null), 2500)
       }
     } catch (err) {
       console.error('Add to cart error', err)
-      setAddMessage('Failed to add to cart')
+      setToast('Failed to add to cart')
+      setTimeout(() => setToast(null), 2500)
     } finally {
       setAdding(false)
-      setTimeout(() => setAddMessage(null), 3000)
     }
   }
 
@@ -289,8 +294,8 @@ function Home() {
                     </button>
                   )}
 
-                  {addMessage && (
-                    <span style={{ marginLeft: 12 }}>{addMessage}</span>
+                  {toast && (
+                    <span style={{ marginLeft: 12, padding: '6px 10px', background: '#e6ffed', borderRadius: 6, color: '#064e3b' }}>{toast}</span>
                   )}
                 </div>
               )}
